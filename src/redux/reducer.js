@@ -1,4 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit';
+import { isUserLogined } from '../helper/helperFn';
 
 const initialState = {
     toastConf: {
@@ -6,7 +7,7 @@ const initialState = {
         message: "",
         type: ''
     },
-    session: false,
+    session: isUserLogined(),
     tokenstatus: 'valid', // Adjust as needed
 };
 

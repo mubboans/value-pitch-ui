@@ -49,7 +49,10 @@ const Login = () => {
                     // }));
                     // console.log('Login successful, token stored.');
                     // toast.current.show({ severity: 'success', summary: 'Login Successful', detail: 'Welcome!', life: 3000 });
-
+                    dispatch({
+                        type: "userSession",
+                        payload: true
+                    });
                 }
             } catch (error) {
                 console.error('Error during login:', error);
@@ -111,13 +114,13 @@ const Login = () => {
                     <Divider align="center">
                         <b>OR</b>
                     </Divider>
-
-                    <div className="flex justify-content-center py-3">
-                        <Button label="Sign Up" icon="pi pi-user-plus" severity="success" className="w-full" onClick={() => {
-
-                        }}></Button>
-                    </div>
                 </form>
+                <div className="flex justify-content-center py-3">
+                    <Button label="Sign Up" icon="pi pi-user-plus" severity="success" className="w-full" onClick={() => {
+                        navigate("/register");
+                    }}></Button>
+                </div>
+
             </div>
         </div>
     );

@@ -6,7 +6,7 @@ import 'primereact/resources/primereact.min.css'; //core css
 import 'primeicons/primeicons.css'; //icons
 import 'primeflex/primeflex.css'; // flex
 // import 'primeflex/themes/primeone-light.css'
-// import './App.css'
+import './App.css'
 
 import { lazy, Suspense } from "react";
 // import Login from './component/Login';
@@ -21,12 +21,15 @@ import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './component/ProtectedRoute';
 // import { isUserLogined } from './helper/helperFn';
 import RouteNotFound from './component/RouteNotFound';
+import NavBar from './component/NavBar';
+import { isUserLogined } from './helper/helperFn';
 
 
 function App() {
   return (
     <div>
       <Toaster />
+      <NavBar isLogin={isUserLogined()} />
       <Suspense fallback={<ProgressBar />}>
         <Routes>
           <Route path="/login" element={<Login />}></Route>

@@ -3,6 +3,7 @@ import axios from 'axios';
 // Create an Axios instance
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:8008/valuepitch',
+    // baseURL: 'https://value-pitch-server.onrender.com/valuepitch'
 });
 
 // Add a request interceptor to attach the token
@@ -10,8 +11,8 @@ axiosInstance.interceptors.request.use(
     async (config) => {
         // Retrieve the token from local storage
         let token = localStorage.getItem('token');
-        token = token.replace(/"/g, '')
         if (token) {
+            token = token.replace(/"/g, '')
             // Attach the token to the Authorization header if it exists
             config.headers['Authorization'] = `Bearer ${token}`;
         }

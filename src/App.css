@@ -1,0 +1,16 @@
+.responsive-modal .p-dialog {
+  width: 90vw;
+  max-width: 600px; /* Maximum width for larger screens */
+}
+
+@media (min-width: 768px) {
+  .responsive-modal .p-dialog {
+      width: 70vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-modal .p-dialog {
+      width: 50vw;
+  }
+}
