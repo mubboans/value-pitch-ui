@@ -40,7 +40,19 @@ const Login = () => {
                     // localStorage.setItem('token', response.data.accesstoken);
                     setValue('token', response.data.data.accesstoken);
                     setValue('userdetail', response.data.data)
-                    navigate("/dashboard");
+                    if (response.data.data.type == 'user') {
+                        if (response.data.data.role == 'client') {
+                            // ENUM('', 'client', 'user')
+                            navigate("/myuser");
+                        } else {
+                            console.log('navigate to myprofile');
+
+                            navigate('/myprofile')
+                        }
+                    }
+                    else {
+                        navigate("/dashboard");
+                    }
                     showToast(dispatch, { showtoast: true, message: response.data.message, type: 'success' })
                     // dispatch(showToast({
                     //     showtoast: true,

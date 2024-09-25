@@ -23,11 +23,13 @@ export default function NavBar() {
         },
         {
             label: 'MyUsers',
-            icon: 'pi pi-star'
+            icon: 'pi pi-star',
+            url: '/dashboard'
         },
         {
             label: 'Profile',
             icon: 'pi pi-search',
+            url: '/myprofile'
         },
         {
             label: 'Logout',

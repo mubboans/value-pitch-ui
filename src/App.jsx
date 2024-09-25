@@ -14,6 +14,7 @@ import { lazy, Suspense } from "react";
 import ProgressBar from './component/ProgressBar';
 const Dashboard = lazy(() => import("./component/Dashboard"));
 const Register = lazy(() => import("./component/Register"));
+const MyProfile = lazy(() => import("./component/MyProfile"));
 const Login = lazy(() => import("./component/Login"));
 // import { useDispatch, useSelector } from "react-redux";
 import Toaster from './component/Toaster';
@@ -37,23 +38,17 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute Component={Dashboard} />
+              <ProtectedRoute allowedRoles={['admin']} Component={Dashboard} />
             }
           ></Route>
+          <Route path='/myprofile' element={
+            <ProtectedRoute allowedRoles={['admin', 'user', 'client']} Component={MyProfile} />
+          } />
+
           <Route path="*" element={<RouteNotFound />} />
+          <Route path='/' element={<Login />} />
         </Routes>
       </Suspense>
-      {/* <Login /> */}
-      {/* <ProgressBar /> */}
-      {/* <Register /> */}
-      {/* <h1>Hello {count}</h1> */}
-      {/* <Button
-        icon="pi pi-plus"
-        className="mr-2"
-        severity="success"
-        label="Increment"
-        onClick={() => setCount((count) => count + 1)}
-      ></Button> */}
     </div>
   )
 }
