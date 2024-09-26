@@ -8,9 +8,11 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import axiosInstance from '../helper/axios_helper';
+import { getValue } from '../helper/helperFn';
 
 const MyUser = () => {
     const [relations, setRelations] = useState([]);
+    const [userOptions, setUserOptions] = useState([]);
     const [relationForm, setRelationForm] = useState({ userid: '', relationtype: 0 });
     const [selectedRelation, setSelectedRelation] = useState(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -19,6 +21,7 @@ const MyUser = () => {
 
     useEffect(() => {
         fetchRelations();
+
     }, []);
 
     const fetchRelations = async () => {
@@ -33,13 +36,33 @@ const MyUser = () => {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch relations' });
         }
     };
+    const fetchUsers = async () => {
+        try {
+            const response = await axiosInstance.get(`/user`);
+            // console.log("response", response.data.data);
+            const options = response?.data?.data?.map((elem) => {
+                return {
+                    label: `${elem?.firstname + " " + elem?.lastname} - (${elem?.role})`,
+                    value: elem?.id
+                }
+            })
+            setUserOptions(options)
+
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const editUser = (rowData) => {
+        fetchUsers()
         setSelectedRelation(rowData);
-        setRelationForm({
-            userid: rowData.userid,
-            relationtype: rowData.relationtype,
-        });
+        // setRelationForm({
+        //     userid: rowData.userid,
+        //     relationtype: rowData.relationtype,
+        // });
         setEditModalVisible(true);
     };
 
@@ -53,27 +76,42 @@ const MyUser = () => {
         }
     };
 
+    console.log("selectedRelation", selectedRelation, relationForm?.relationtype);
+
     const handleEditRelation = async () => {
+        const payload = {
+            "userid": relationForm?.relationtype == 1 || relationForm?.relationtype == 2 ? relationForm?.userid : null,
+            "clientid": relationForm?.relationtype < 1 ? relationForm?.userid : null,
+            "adminid": relationForm?.relationtype < 2 ? JSON.parse(localStorage?.getItem("userdetail"))?.id : null,
+            "relationtype": relationForm?.relationtype,
+            "createdDate": selectedRelation?.createdDate,
+            "createdAt": selectedRelation?.createdAt,
+            "updatedAt": selectedRelation?.updatedAt,
+            "id": selectedRelation?.id
+        }
         try {
-            await axiosInstance.put('/relation', {
-                ...selectedRelation,
-                userid: relationForm.userid,
-                relationtype: relationForm.relationtype,
-            });
-            fetchRelations();
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Relation updated successfully' });
+            await axiosInstance.put('/relation', payload);
             setEditModalVisible(false);
+            fetchRelations();
+            // toast.current.show({ severity: 'success', summary: 'Success', detail: 'Relation updated successfully' });
         } catch (error) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to update relation' });
         }
     };
 
     const handleAddRelation = async () => {
+        const payload = {
+            "userid": relationForm?.relationtype == 1 || relationForm?.relationtype == 2 ? relationForm?.userid : null,
+            "clientid": relationForm?.relationtype < 1 ? relationForm?.userid : null,
+            "adminid": relationForm?.relationtype < 2 ? JSON.parse(localStorage?.getItem("userdetail"))?.id : null,
+            "relationtype": relationForm?.relationtype,
+        }
+
         try {
-            await axiosInstance.post('relation', relationForm);
+            await axiosInstance.post('relation', payload);
             fetchRelations();
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Relation added successfully' });
             setAddModalVisible(false);
+            // toast.current.show({ severity: 'success', summary: 'Success', detail: 'Relation added successfully' });
         } catch (error) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to add relation' });
         }
@@ -96,17 +134,15 @@ const MyUser = () => {
     };
 
     return (
-        <div className="p-grid p-fluid">
+        <div className="p-grid">
             <div className="p-col-12">
-                <div className="p-d-flex justify-content-center align-items-center">
-                    <div>
-                        <h3>User Relations</h3>
-                    </div>
-                    <div>
-                        <Button label="Add Users" icon="pi pi-plus" className="p-button-rounded p-button-success p-button-sm" onClick={() => setAddModalVisible(true)} />
-                    </div>
+                <div className="p-d" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: '15px' }}>
+                    <h3>User Relations</h3>
+                    <Button label="Add Users" icon="pi pi-plus" className="p-button-rounded p-button-success p-button-sm" onClick={() => {
+                        setAddModalVisible(true);
+                        fetchUsers();
+                    }} />
                 </div>
-
                 <DataTable value={relations} responsiveLayout="scroll">
                     <Column field="id" header="ID" />
                     <Column field="user.firstname" header="First Name" />
@@ -117,47 +153,103 @@ const MyUser = () => {
                 </DataTable>
 
                 {/* Edit Relation Modal */}
-                <Dialog visible={editModalVisible} onHide={() => setEditModalVisible(false)} header="Edit Relation">
-                    <div className="p-field">
-                        <label htmlFor="userid">User ID</label>
-                        <InputText id="userid" value={relationForm.userid} onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })} />
+                <Dialog visible={editModalVisible} onHide={() => setEditModalVisible(false)} header="Edit Relation" style={{ maxWidth: "400px", width: "100%" }}>
+                    <div className="p-col-6 p-md-6" >
+
+                        <div className="p-field">
+                            <div>
+                                <label htmlFor="userid">User ID</label>
+                            </div>
+                            <Dropdown
+                                style={{ width: "100%" }}
+                                id="userid"
+                                value={relationForm.userid}
+                                options={userOptions}
+                                onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })}
+                            />
+
+                            {/* <InputText id="userid" style={{width:"100%"}} value={relationForm.userid} onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })} /> */}
+
+                        </div>
+                        <div className="p-field" style={{ marginTop: "10px" }}>
+                            <div>
+                                <label htmlFor="relationtype">Relation Type</label>
+                            </div>
+                            <Dropdown
+                                style={{ width: "100%" }}
+                                id="relationtype"
+                                value={relationForm.relationtype}
+                                options={getValue('userdetail')?.role == "admin" ?
+                                    [
+                                        { label: 'Admin added Client', value: 0 },
+                                        { label: 'Admin added User', value: 1 },
+                                    ]
+
+                                    : getValue('userdetail')?.role == 'client' ?
+                                        [
+                                            { label: 'Client added User', value: 2 },
+                                        ] :
+                                        [
+                                            { label: 'Admin added Client', value: 0 },
+                                            { label: 'Admin added User', value: 1 },
+                                            { label: 'Client added User', value: 2 },
+                                        ]}
+                                onChange={(e) => setRelationForm({ ...relationForm, relationtype: e.value })}
+                            />
+
+                        </div>
                     </div>
-                    <div className="p-field">
-                        <label htmlFor="relationtype">Relation Type</label>
-                        <Dropdown
-                            id="relationtype"
-                            value={relationForm.relationtype}
-                            options={[
-                                { label: 'Admin added Client', value: 0 },
-                                { label: 'Admin added User', value: 1 },
-                                { label: 'Client added User', value: 2 },
-                            ]}
-                            onChange={(e) => setRelationForm({ ...relationForm, relationtype: e.value })}
-                        />
-                    </div>
-                    <Button label="Save" icon="pi pi-check" onClick={handleEditRelation} />
+                    <Button label="Save" icon="pi pi-check" onClick={handleEditRelation} style={{ margin: "20px 0 0 120px" }} />
                 </Dialog>
 
                 {/* Add Relation Modal */}
-                <Dialog visible={addModalVisible} onHide={() => setAddModalVisible(false)} header="Add New Relation">
-                    <div className="p-field">
-                        <label htmlFor="userid">User ID</label>
-                        <InputText id="userid" value={relationForm.userid} onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })} />
+                <Dialog visible={addModalVisible} onHide={() => setAddModalVisible(false)} header="Add New Relation" style={{ maxWidth: "400px", width: "100%" }}>
+                    <div className="p-col-6 p-md-6" >
+
+                        <div className="p-field">
+                            <div>
+                                <label htmlFor="userid">User ID</label>
+                            </div>
+                            <Dropdown
+                                style={{ width: "100%" }}
+                                id="userid"
+                                value={relationForm.userid}
+                                options={userOptions}
+                                onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })}
+                            />
+
+                            {/* <InputText id="userid" style={{width:"100%"}} value={relationForm.userid} onChange={(e) => setRelationForm({ ...relationForm, userid: e.target.value })} /> */}
+
+                        </div>
+                        <div className="p-field" style={{ marginTop: "10px" }}>
+                            <div>
+                                <label htmlFor="relationtype">Relation Type</label>
+                            </div>
+                            <Dropdown
+                                style={{ width: "100%" }}
+                                id="relationtype"
+                                value={relationForm.relationtype}
+                                options={getValue('userdetail')?.role == "admin" ?
+                                    [
+                                        { label: 'Admin added Client', value: 0 },
+                                        { label: 'Admin added User', value: 1 },
+                                    ]
+
+                                    : getValue('userdetail')?.role == 'client' ?
+                                        [
+                                            { label: 'Client added User', value: 2 },
+                                        ] :
+                                        [
+                                            { label: 'Admin added Client', value: 0 },
+                                            { label: 'Admin added User', value: 1 },
+                                            { label: 'Client added User', value: 2 },
+                                        ]}
+                                onChange={(e) => setRelationForm({ ...relationForm, relationtype: e.value })}
+                            />
+
+                        </div>
                     </div>
-                    <div className="p-field">
-                        <label htmlFor="relationtype">Relation Type</label>
-                        <Dropdown
-                            id="relationtype"
-                            value={relationForm.relationtype}
-                            options={[
-                                { label: 'Admin added Client', value: 0 },
-                                { label: 'Admin added User', value: 1 },
-                                { label: 'Client added User', value: 2 },
-                            ]}
-                            onChange={(e) => setRelationForm({ ...relationForm, relationtype: e.value })}
-                        />
-                    </div>
-                    <Button label="Add" icon="pi pi-check" onClick={handleAddRelation} />
+                    <Button label="Save" icon="pi pi-check" onClick={handleAddRelation} style={{ margin: "20px 0 0 120px" }} />
                 </Dialog>
             </div>
         </div>

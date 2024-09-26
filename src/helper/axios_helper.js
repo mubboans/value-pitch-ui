@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8008/valuepitch',
-    // baseURL: 'https://value-pitch-server.onrender.com/valuepitch'
+    // baseURL: 'http://localhost:8008/valuepitch',
+    baseURL: 'https://value-pitch-server.onrender.com/valuepitch'
 });
 
 // Add a request interceptor to attach the token
