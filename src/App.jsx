@@ -15,6 +15,7 @@ import ProgressBar from './component/ProgressBar';
 const Dashboard = lazy(() => import("./component/Dashboard"));
 const Register = lazy(() => import("./component/Register"));
 const MyProfile = lazy(() => import("./component/MyProfile"));
+const MyUser = lazy(() => import("./component/MyUser"));
 const Login = lazy(() => import("./component/Login"));
 // import { useDispatch, useSelector } from "react-redux";
 import Toaster from './component/Toaster';
@@ -38,13 +39,15 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['admin']} Component={Dashboard} />
+              <ProtectedRoute allowedRoles={['admin', 'client']} Component={Dashboard} />
             }
           ></Route>
           <Route path='/myprofile' element={
             <ProtectedRoute allowedRoles={['admin', 'user', 'client']} Component={MyProfile} />
           } />
-
+          <Route path='/myuser' element={
+            <ProtectedRoute allowedRoles={['admin', 'client']} Component={MyUser} />
+          } />
           <Route path="*" element={<RouteNotFound />} />
           <Route path='/' element={<Login />} />
         </Routes>

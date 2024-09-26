@@ -24,7 +24,7 @@ export default function NavBar() {
         {
             label: 'MyUsers',
             icon: 'pi pi-star',
-            url: '/dashboard'
+            url: '/myuser'
         },
         {
             label: 'Profile',

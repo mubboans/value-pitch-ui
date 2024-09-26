@@ -5,11 +5,13 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import axiosInstance from './../helper/axios_helper';
-import { showToast } from '../helper/helperFn';
+import { LogoutUser, showToast } from '../helper/helperFn';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -34,6 +36,9 @@ const Dashboard = () => {
             setData(response.data.data);
         } catch (error) {
             console.error('Error fetching data:', error);
+            if (error?.response?.data?.message == "jwt expired") {
+                LogoutUser();
+            }
         } finally {
             setLoading(false);
         }
